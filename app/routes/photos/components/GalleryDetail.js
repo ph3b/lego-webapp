@@ -77,7 +77,7 @@ export default class GalleryDetail extends Component<Props, State> {
             photos={pictures}
             hasMore={hasMore}
             fetching={fetching}
-            fetchNext={fetch}
+            fetchNext={() => fetch(gallery.id, { next: true })}
             onClick={this.handleClick}
             srcKey="file"
             renderEmpty={() => (
