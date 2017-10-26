@@ -9,7 +9,7 @@ import form from './forms';
 import companies from './companies';
 import companySemesters from './companySemesters';
 import quotes from './quotes';
-import pictures from './pictures';
+import galleryPictures from './galleryPictures';
 import events from './events';
 import articles from './articles';
 import pools from './pools';
@@ -45,7 +45,7 @@ const reducers = {
   allowed,
   quotes,
   events,
-  pictures,
+  galleryPictures,
   articles,
   pools,
   registrations,
@@ -116,12 +116,13 @@ export const articleSchema = new schema.Entity('articles', {
   comments: [commentSchema],
   author: userSchema
 });
-export const galleryPictureSchema = new schema.Entity('pictures', {
+
+export const galleryPictureSchema = new schema.Entity('galleryPictures', {
   comments: [commentSchema]
 });
-export const gallerySchema = new schema.Entity('galleries', {
-  pictures: [galleryPictureSchema]
-});
+
+export const gallerySchema = new schema.Entity('galleries');
+
 export const quoteSchema = new schema.Entity('quotes', {
   comments: [commentSchema]
 });
