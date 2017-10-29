@@ -2,7 +2,8 @@
 
 import jwtDecode from 'jwt-decode';
 import { normalize } from 'normalizr';
-import cookie from 'react-cookie';
+import config from 'app/config';
+import cookie from 'js-cookie';
 import moment from 'moment-timezone';
 import { push, replace } from 'react-router-redux';
 import { userSchema } from 'app/reducers';
@@ -10,26 +11,18 @@ import callAPI from 'app/actions/callAPI';
 import { User } from './ActionTypes';
 import { uploadFile } from './FileActions';
 import { fetchMeta } from './MetaActions';
-import { addNotification } from 'app/actions/NotificationActions';
 import type { Thunk, Action } from 'app/types';
 
 const USER_STORAGE_KEY = 'lego.auth';
 
-function loadToken() {
-  return cookie.load(USER_STORAGE_KEY);
-}
-
 function saveToken(token) {
   const decoded = jwtDecode(token);
   const expires = moment.unix(decoded.exp);
-  // milliseconds -> seconds:
-  const maxAge = expires.diff(moment()) / 1000;
-  return cookie.save(USER_STORAGE_KEY, token, {
+  return cookie.set(USER_STORAGE_KEY, token, {
     path: '/',
-    maxAge,
     expires: expires.toDate(),
     // Only HTTPS in prod:
-    secure: !__DEV__
+    secure: config.environment === 'production'
   });
 }
 
@@ -117,7 +110,7 @@ export function updateUser(
     ).then(action => {
       if (!action || !action.payload) return;
       if (!options.noRedirect) {
-        dispatch(push(`/users/${action.payload.result || 'me'}`));
+        dispatch(push(`/users/${username}`));
       }
     });
 }
@@ -146,23 +139,11 @@ export function changePassword({
         },
         schema: userSchema,
         meta: {
-          errorMessage: 'Oppdatering av passord feilet'
+          errorMessage: 'Oppdatering av passord feilet',
+          successMessage: 'Passordet ble endret'
         }
       })
-    ).then(action => {
-      dispatch(
-        push(
-          `/users/${(action && action.payload && action.payload.result) ||
-            'me'}`
-        )
-      );
-      dispatch(
-        addNotification({
-          message: 'Passordet ble endret',
-          dismissAfter: 5000
-        })
-      );
-    });
+    );
 }
 
 export function updatePicture({
@@ -214,7 +195,6 @@ export function loginWithExistingToken(token: string): Thunk<any> {
   return dispatch => {
     const decoded = jwtDecode(token);
     const expirationTime = moment.unix(decoded.exp);
-    const issuedTime = moment.unix(decoded.orig_iat);
     const now = moment();
 
     if (now.isAfter(expirationTime)) {
@@ -227,26 +207,40 @@ export function loginWithExistingToken(token: string): Thunk<any> {
       payload: { token }
     });
 
-    return dispatch(fetchUser()).then(() => {
-      // Refresh the token if it wasn't created today:
-      if (!issuedTime.isSame(now, 'day')) {
-        return dispatch(refreshToken(token))
-          .then(action => saveToken(action.payload.token))
-          .catch(err => {
-            removeToken();
-            throw err;
-          });
-      }
-    });
+    return dispatch(fetchUser());
+  };
+}
+
+/**
+ * Refreshes the token if it was issued any other day than today.
+ */
+export function maybeRefreshToken(): Thunk<*> {
+  return dispatch => {
+    const token = cookie.get(USER_STORAGE_KEY);
+    if (!token) return Promise.resolve();
+    const decoded = jwtDecode(token);
+    const issuedTime = moment.unix(decoded.orig_iat);
+    if (!issuedTime.isSame(moment(), 'day')) {
+      return dispatch(refreshToken(token))
+        .then(action => saveToken(action.payload.token))
+        .catch(err => {
+          removeToken();
+          throw err;
+        });
+    }
+
+    return Promise.resolve();
   };
 }
 
 /**
  * Dispatch a login success if a token exists in local storage.
  */
-export function loginAutomaticallyIfPossible(): Thunk<*> {
+export function loginAutomaticallyIfPossible(
+  getCookie: string => string
+): Thunk<*> {
   return dispatch => {
-    const token = loadToken();
+    const token = getCookie(USER_STORAGE_KEY);
 
     if (token) {
       return dispatch(loginWithExistingToken(token));

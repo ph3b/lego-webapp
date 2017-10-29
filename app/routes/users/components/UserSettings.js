@@ -29,6 +29,7 @@ type Props = FieldProps & {
   updateUser: Object => Promise<void>,
   user: any,
   isMe: boolean,
+  push: string => void,
   updatePicture: Object => void
 };
 
@@ -42,6 +43,7 @@ const UserSettings = (props: Props) => {
     pristine,
     submitting,
     updatePicture,
+    push,
     user
   } = props;
 
@@ -63,7 +65,7 @@ const UserSettings = (props: Props) => {
       <Form onSubmit={handleSubmit(onSubmit)}>
         <Field
           placeholder="Brukernavn"
-          label="Username"
+          label="Brukernavn"
           name="username"
           readOnly
           component={TextInput.Field}
@@ -74,14 +76,14 @@ const UserSettings = (props: Props) => {
 
         <Field
           placeholder="Fornavn"
-          label="First name"
+          label="Fornavn"
           name="firstName"
           component={TextInput.Field}
         />
 
         <Field
           placeholder="Etternavn"
-          label="Last name"
+          label="Etternavn"
           name="lastName"
           component={TextInput.Field}
         />
@@ -123,7 +125,7 @@ const UserSettings = (props: Props) => {
       {isMe && (
         <div className={styles.changePassword}>
           <h2>Endre passord</h2>
-          <ChangePassword changePassword={changePassword} />
+          <ChangePassword push={push} changePassword={changePassword} />
         </div>
       )}
     </div>
