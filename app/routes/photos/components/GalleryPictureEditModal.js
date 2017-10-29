@@ -3,7 +3,6 @@
 import React from 'react';
 import GalleryDetailsRow from './GalleryDetailsRow';
 import { Form, TextArea, SelectInput, CheckBox } from 'app/components/Form';
-import LoadingIndicator from 'app/components/LoadingIndicator';
 import Button from 'app/components/Button';
 import { Field, reduxForm } from 'redux-form';
 import { Flex } from 'app/components/Layout';
@@ -16,7 +15,7 @@ type Props = {
   gallery: Object,
   push: string => void,
   handleSubmit: ((Object) => void) => void,
-  updatePicture: (number, number, Object) => Promise<*>,
+  updatePicture: Object => Promise<*>,
   deletePicture: () => Promise<*>,
   onDeleteGallery: () => mixed
 };
@@ -30,16 +29,16 @@ const GalleryPictureEditModal = ({
   onDeleteGallery,
   handleSubmit
 }: Props) => {
-  if (!picture) return <LoadingIndicator loading />;
-
   const onSubmit = data => {
     const body = {
+      id: picture.id,
+      galleryId: gallery.id,
       description: data.description,
       active: data.ative,
       taggees: data.taggees && data.taggees.map(taggee => taggee.value)
     };
 
-    updatePicture(gallery.id, picture.id, body);
+    updatePicture(body);
     push(`/photos/${gallery.id}/picture/${picture.id}`);
   };
 
@@ -81,12 +80,14 @@ const GalleryPictureEditModal = ({
           <Flex className={styles.pictureDescription} width="100%">
             <Form className={styles.form} onSubmit={handleSubmit(onSubmit)}>
               <Field
+                label="Bilde beskrivelse"
                 placeholder="Beskrivelse"
                 name="description"
                 component={TextArea.Field}
                 id="gallery-picture-description"
               />
               <Field
+                label="Synlig for alle brukere"
                 placeholder="Synlig for alle brukere"
                 name="active"
                 component={CheckBox.Field}
@@ -94,7 +95,7 @@ const GalleryPictureEditModal = ({
                 normalize={v => !!v}
               />
               <Field
-                label="Brukere"
+                label="Tagg brukere"
                 name="taggees"
                 id="gallery-picture-taggees"
                 filter={['users.user']}
@@ -102,23 +103,7 @@ const GalleryPictureEditModal = ({
                 component={SelectInput.AutocompleteField}
                 multi
               />
-              <Flex
-                className={styles.buttonRow}
-                alignItems="baseline"
-                justifyContent="flex-end"
-              >
-                <Button
-                  danger
-                  secondary
-                  onClick={onDeleteGallery}
-                  className={styles.deleteButton}
-                >
-                  Delete
-                </Button>
-                <Button className={styles.submitButton} type="submit" primary>
-                  Save
-                </Button>
-              </Flex>
+              <Button type="submit">Lagre</Button>
             </Form>
           </Flex>
         </div>

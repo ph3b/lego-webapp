@@ -10,6 +10,9 @@
 .header {
   display: inline;
   font-weight: 400;
+  margin: 0;
+  padding-top: 15px;
+  padding-bottom: 15px;
   text-transform: uppercase;
 }
 
@@ -29,4 +32,29 @@
     flex-direction: column;
     align-items: flex-start;
   }
+}
+
+span.back {
+  font-weight: 600;
+  margin-left: 15px;
+}
+
+.backIcon {
+  vertical-align: middle;
+}
+
+.details {
+  margin-bottom: 15px;
+}
+
+h1.hasDetails {
+  padding-bottom: 0px;
+}
+
+h1.hasBack {
+  padding-top: 0px;
+}
+
+div.hasDetails {
+  margin-bottom: 0px;
 }
