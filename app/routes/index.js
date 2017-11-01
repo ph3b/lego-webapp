@@ -19,6 +19,7 @@ import companyInterest from './companyInterest';
 import bdb from './bdb';
 import contact from './contact';
 import timeline from './timeline';
+import surveys from './surveys';
 
 export default {
   path: '/',
@@ -43,6 +44,7 @@ export default {
     contact,
     timeline,
     companyInterest,
+    surveys,
     {
       path: '*',
       component: HTTPError
