@@ -3,7 +3,6 @@
 import styles from './surveys.css';
 import React, { Component } from 'react';
 import { DetailNavigation, ListNavigation } from '../utils.js';
-import LoadingIndicator from 'app/components/LoadingIndicator';
 import { Field } from 'redux-form';
 import Button from 'app/components/Button';
 import {
@@ -17,13 +16,11 @@ import { createValidator, required } from 'app/utils/validation';
 import { reduxForm } from 'redux-form';
 import type { SurveyEntity } from 'app/reducers/surveys';
 import Content from 'app/components/Layout/Content';
+import type { FieldProps } from 'redux-form';
 
-type Props = {
+type Props = FieldProps & {
   survey: SurveyEntity,
-  submitting: boolean,
-  handleSubmit: ((SurveyEntity) => Promise<*>) => void,
   autoFocus: any,
-  fetching: boolean,
   submitFunction: (SurveyEntity, ?number) => Promise<*>,
   deleteSurvey: number => Promise<*>,
   push: string => void
@@ -48,13 +45,8 @@ class SurveyEditor extends Component<Props> {
       submitting,
       autoFocus,
       handleSubmit,
-      fetching,
       deleteSurvey
     } = this.props;
-
-    if (fetching) {
-      return <LoadingIndicator />;
-    }
 
     const titleField = (
       <Field

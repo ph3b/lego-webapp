@@ -3,7 +3,6 @@
 import React, { Component } from 'react';
 import SurveyList from './SurveyList';
 import styles from './surveys.css';
-import LoadingIndicator from 'app/components/LoadingIndicator';
 import type { SurveyEntity } from 'app/reducers/surveys';
 import { ListNavigation } from '../utils.js';
 import TextInput from 'app/components/Form/TextInput';
@@ -48,10 +47,6 @@ export default class SurveyPage extends Component<Props, State> {
 
   render() {
     const { surveys, fetching, push } = this.props;
-
-    if (!surveys) {
-      return <LoadingIndicator loading />;
-    }
 
     const filteredSurveys = this.filterSurveys(surveys);
 
